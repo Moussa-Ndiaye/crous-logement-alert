@@ -79,6 +79,12 @@ def main():
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(locale='fr-FR')
         response = page.goto(url, wait_until='domcontentloaded', timeout=45000)
+              
+print("DIAGNOSTIC - URL :", page.url)
+print("DIAGNOSTIC - Titre :", page.title())
+print("DIAGNOSTIC - Nombre de liens :", page.locator("a").count())
+print("DIAGNOSTIC - Extrait du texte :", page.locator("body").inner_text()[:1500])
+
         if response is None or response.status >= 400:
             raise RuntimeError('Page CROUS inaccessible')
         page.wait_for_timeout(4500)
