@@ -19,11 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-      - name: Tester le filtrage sans notification
-        run: python test_crous.py
 
         with:
           python-version: '3.12'
+          
+      - name: Tester le filtrage sans notification
+        run: python test_crous.py
+        
       - name: Installer Playwright
         run: |
           pip install playwright==1.56.0
