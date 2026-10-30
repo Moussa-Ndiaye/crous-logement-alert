@@ -78,7 +78,7 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(locale='fr-FR')
-        response = page.goto(url, wait_until='domcontentloaded', timeout=45000)
+        response = page.goto(url, wait_until="commit", timeout=30000)
               
         print("DIAGNOSTIC - URL :", page.url)
         print("DIAGNOSTIC - Titre :", page.title())
