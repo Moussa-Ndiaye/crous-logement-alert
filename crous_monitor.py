@@ -83,7 +83,7 @@ def main():
         print("DIAGNOSTIC - URL :", page.url)
         print("DIAGNOSTIC - Titre :", page.title())
         print("DIAGNOSTIC - Nombre de liens :", page.locator("a").count())
-        print("DIAGNOSTIC - Extrait du texte :", page.locator("body").inner_text()[:1500])
+        print("DIAGNOSTIC - Texte :", page.locator("body").inner_text()[-3000:])
 
         if response is None or response.status >= 400:
             raise RuntimeError('Page CROUS inaccessible')
