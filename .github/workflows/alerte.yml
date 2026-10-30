@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   surveillance:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 4
     steps:
       - uses: actions/checkout@v4
