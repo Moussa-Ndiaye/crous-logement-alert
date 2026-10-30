@@ -1,0 +1,14 @@
+
+name: Alerte logements CROUS
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  surveillance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier la configuration
+        run: echo "Surveillance CROUS - configuration en cours"
