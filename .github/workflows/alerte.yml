@@ -1,54 +1,44 @@
-
 name: Alerte logements CROUS
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crous-monitor
+  cancel-in-progress: false
 
 jobs:
-  test-telegram:
+  surveillance:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 4
     steps:
-      - name: Envoyer un message Telegram
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Installer Playwright
+        run: |
+          pip install playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Vérifier les annonces
         env:
+          CROUS_SEARCH_URL: 'https://trouverunlogement.lescrous.fr/tools/47/search?maxPrice=500&bounds=2.8777125901192147_50.775550104554206_3.261547428986402_50.50207262318312&locationName=Lille'
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python crous_monitor.py
+      - name: Enregistrer les annonces déjà vues
         run: |
-          python3 - <<'PY'
-          import os
-          import json
-          import urllib.request
-
-          token = os.environ["TELEGRAM_BOT_TOKEN"]
-          chat_id = os.environ["TELEGRAM_CHAT_ID"]
-
-          url = f"https://api.telegram.org/bot{token}/sendMessage"
-
-          message = (
-              "🏠 TEST ALERTE CROUS LILLE\n\n"
-              "✅ Connexion GitHub → Telegram réussie !\n\n"
-              "📍 Zone : Lille et environs\n"
-              "💰 Budget maximum : 400 €/mois\n"
-              "⏱️ Fréquence prévue : 5 minutes\n\n"
-              "Ceci est un test, pas une annonce réelle."
-          )
-
-          data = json.dumps({
-              "chat_id": chat_id,
-              "text": message
-          }).encode("utf-8")
-
-          request = urllib.request.Request(
-              url,
-              data=data,
-              headers={"Content-Type": "application/json"},
-              method="POST"
-          )
-
-          with urllib.request.urlopen(request, timeout=20) as response:
-              result = json.load(response)
-              if not result.get("ok"):
-                  raise RuntimeError("Telegram a refusé le message")
-
-          print("Message Telegram envoyé avec succès !")
-          PY
+          if [ -f seen_logements.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add seen_logements.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Mettre à jour les annonces CROUS déjà vues"
+              git push
+            fi
+          fi
